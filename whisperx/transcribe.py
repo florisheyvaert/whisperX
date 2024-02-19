@@ -2,6 +2,7 @@ import argparse
 import gc
 import os
 import warnings
+import sys
 
 import numpy as np
 import torch
@@ -76,9 +77,18 @@ def cli():
     parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face Access Token to access PyAnnote gated models")
 
     parser.add_argument("--print_progress", type=str2bool, default = False, help = "if True, progress will be printed in transcribe() and align() methods.")
+
+    parser.add_argument("--version", action="store_true", help="Check version of whisperx")
     # fmt: on
 
     args = parser.parse_args().__dict__
+
+    version: bool = args.pop("version")
+
+    if version:
+        print("Version: e906be9688334b4ae7d3a23f69734ac901a255ee", flush=True)
+        sys.exit(0)
+
     model_name: str = args.pop("model")
     batch_size: int = args.pop("batch_size")
     model_dir: str = args.pop("model_dir")
