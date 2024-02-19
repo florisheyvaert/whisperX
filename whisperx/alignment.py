@@ -67,7 +67,7 @@ def load_align_model(language_code, device, model_name=None, model_dir=None):
             model_name = DEFAULT_ALIGN_MODELS_HF[language_code]
         else:
             print(f"There is no default alignment model set for this language ({language_code}).\
-                Please find a wav2vec2.0 model finetuned on this language in https://huggingface.co/models, then pass the model name in --align_model [MODEL_NAME]")
+                Please find a wav2vec2.0 model finetuned on this language in https://huggingface.co/models, then pass the model name in --align_model [MODEL_NAME]", flush=True)
             raise ValueError(f"No default align-model for language: {language_code}")
 
     if model_name in torchaudio.pipelines.__all__:
@@ -81,8 +81,8 @@ def load_align_model(language_code, device, model_name=None, model_dir=None):
             processor = Wav2Vec2Processor.from_pretrained(model_name)
             align_model = Wav2Vec2ForCTC.from_pretrained(model_name)
         except Exception as e:
-            print(e)
-            print(f"Error loading model from huggingface, check https://huggingface.co/models for finetuned wav2vec2.0 models")
+            print(e, flush=True)
+            print(f"Error loading model from huggingface, check https://huggingface.co/models for finetuned wav2vec2.0 models", flush=True)
             raise ValueError(f'The chosen align_model "{model_name}" could not be found in huggingface (https://huggingface.co/models) or torchaudio (https://pytorch.org/audio/stable/pipelines.html#id14)')
         pipeline_type = "huggingface"
         align_model = align_model.to(device)
@@ -129,7 +129,7 @@ def align(
         if print_progress:
             base_progress = ((sdx + 1) / total_segments) * 100
             percent_complete = (50 + base_progress / 2) if combined_progress else base_progress
-            print(f"Progress: {percent_complete:.2f}%...")
+            print(f"Progress: {percent_complete:.2f}%...", flush=True)
             
         num_leading = len(segment["text"]) - len(segment["text"].lstrip())
         num_trailing = len(segment["text"]) - len(segment["text"].rstrip())
@@ -194,12 +194,12 @@ def align(
 
         # check we can align
         if len(segment["clean_char"]) == 0:
-            print(f'Failed to align segment ("{segment["text"]}"): no characters in this segment found in model dictionary, resorting to original...')
+            print(f'Failed to align segment ("{segment["text"]}"): no characters in this segment found in model dictionary, resorting to original...', flush=True)
             aligned_segments.append(aligned_seg)
             continue
 
         if t1 >= MAX_DURATION:
-            print(f'Failed to align segment ("{segment["text"]}"): original start time longer than audio duration, skipping...')
+            print(f'Failed to align segment ("{segment["text"]}"): original start time longer than audio duration, skipping...', flush=True)
             aligned_segments.append(aligned_seg)
             continue
 
@@ -240,7 +240,7 @@ def align(
         path = backtrack(trellis, emission, tokens, blank_id)
 
         if path is None:
-            print(f'Failed to align segment ("{segment["text"]}"): backtrack failed, resorting to original...')
+            print(f'Failed to align segment ("{segment["text"]}"): backtrack failed, resorting to original...', flush=True)
             aligned_segments.append(aligned_seg)
             continue
 

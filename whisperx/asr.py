@@ -207,7 +207,7 @@ class FasterWhisperPipeline(Pipeline):
         if self.suppress_numerals:
             previous_suppress_tokens = self.options.suppress_tokens
             numeral_symbol_tokens = find_numeral_symbol_tokens(self.tokenizer)
-            print(f"Suppressing numeral and symbol tokens")
+            print(f"Suppressing numeral and symbol tokens", flush=True)
             new_suppressed_tokens = numeral_symbol_tokens + self.options.suppress_tokens
             new_suppressed_tokens = list(set(new_suppressed_tokens))
             self.options = self.options._replace(suppress_tokens=new_suppressed_tokens)
@@ -219,7 +219,7 @@ class FasterWhisperPipeline(Pipeline):
             if print_progress:
                 base_progress = ((idx + 1) / total_segments) * 100
                 percent_complete = base_progress / 2 if combined_progress else base_progress
-                print(f"Progress: {percent_complete:.2f}%...")
+                print(f"Progress: {percent_complete:.2f}%...", flush=True)
             text = out['text']
             if batch_size in [0, 1, None]:
                 text = text[0]
@@ -244,7 +244,7 @@ class FasterWhisperPipeline(Pipeline):
 
     def detect_language(self, audio: np.ndarray):
         if audio.shape[0] < N_SAMPLES:
-            print("Warning: audio is shorter than 30s, language detection may be inaccurate.")
+            print("Warning: audio is shorter than 30s, language detection may be inaccurate.", flush=True)
         model_n_mels = self.model.feat_kwargs.get("feature_size")
         segment = log_mel_spectrogram(audio[: N_SAMPLES],
                                       n_mels=model_n_mels if model_n_mels is not None else 80,
@@ -253,7 +253,7 @@ class FasterWhisperPipeline(Pipeline):
         results = self.model.model.detect_language(encoder_output)
         language_token, language_probability = results[0][0]
         language = language_token[2:-2]
-        print(f"Detected language: {language} ({language_probability:.2f}) in first 30s of audio...")
+        print(f"Detected language: {language} ({language_probability:.2f}) in first 30s of audio...", flush=True)
         return language
 
 def load_model(whisper_arch,
@@ -294,7 +294,7 @@ def load_model(whisper_arch,
     if language is not None:
         tokenizer = faster_whisper.tokenizer.Tokenizer(model.hf_tokenizer, model.model.is_multilingual, task=task, language=language)
     else:
-        print("No language specified, language will be first be detected for each audio file (increases inference time).")
+        print("No language specified, language will be first be detected for each audio file (increases inference time).", flush=True)
         tokenizer = None
 
     default_asr_options =  {
